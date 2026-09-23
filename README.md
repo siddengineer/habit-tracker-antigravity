@@ -3,6 +3,51 @@
 A clean, responsive, full-stack Habit Tracker web application built from scratch with Python, Django 5.x, SQLite, and modern vanilla CSS.
 
 ---
+prompt:
+Build a "Habit Tracker" web app from scratch in this empty workspace
+using Django. Work fully autonomously from start to finish. Do NOT stop
+to ask for approval or clarification. If something is ambiguous, make a
+reasonable choice, keep going, and record the assumption in the
+final summary.
+
+STACK
+- Python 3.11+, Django 5.x, SQLite
+- Virtualenv in .venv, dependencies in requirements.txt
+- Django templates + plain CSS, minimal vanilla JS, no Node tooling
+- Tests: Django's built-in TestCase
+
+DATA MODEL
+- Habit: user (FK), name, target_days_per_week, created_at
+- Completion: habit (FK), date, unique constraint on (habit, date)
+
+FEATURES
+1. Create, edit, delete habits (ModelForm + class-based views).
+2. Mark done for today / undo (POST-only, CSRF protected).
+3. Weekly grid (Mon-Sun) with completed days highlighted.
+4. Current streak per habit, in a testable model method or service.
+5. Django admin registered for both models.
+6. Login required; each user sees and edits only their own habits.
+7. Responsive layout that works at phone width.
+
+WORKFLOW (do all of this without pausing)
+1. Write a short plan and task list as an artifact for the record,
+   then immediately start building.
+2. Create the project, app, models, migrations, views, urls, templates.
+3. Write tests: streak calculation (including a missed day resetting the
+   streak), the unique constraint, and user isolation (one user cannot
+   view or edit another user's habits).
+4. Run `python manage.py test`. If anything fails, fix it and re-run
+   until everything passes.
+5. Run migrations, start `runserver`, and verify in the browser:
+   register/login, add a habit, mark it done, refresh to confirm it
+   persisted, and check the phone-width layout. Fix any bugs found and
+   re-verify.
+6. Write a README with setup and run instructions.
+
+FINISH
+Stop only when the app runs and all tests pass. Then give me a final
+walkthrough: what you built, what you tested, assumptions you made,
+and anything you'd flag for review.
 
 ## Features
 
