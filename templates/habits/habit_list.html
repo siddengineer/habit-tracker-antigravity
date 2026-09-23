@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - HabitFlow{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div class="header-title">
+    <h1>My Habits</h1>
+    <p>Today is <strong>{{ today|date:"l, F j, Y" }}</strong></p>
+  </div>
+  <div>
+    <a href="{% url 'habit_create' %}" class="btn btn-primary">
+      <span>+ Add New Habit</span>
+    </a>
+  </div>
+</div>
+
+{% if habit_cards %}
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Habits</div>
+      <div class="stat-value">{{ total_habits }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Done Today</div>
+      <div class="stat-value" style="color: var(--success);">{{ today_completed_count }} / {{ total_habits }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Current Week</div>
+      <div class="stat-value" style="font-size: 1rem; color: var(--text-muted); margin-top: 0.5rem;">
+        {{ week_headers.0.date|date:"M j" }} – {{ week_headers.6.date|date:"M j" }}
+      </div>
+    </div>
+  </div>
+
+  <div class="habits-list">
+    {% for item in habit_cards %}
+      <div class="habit-card">
+        <div class="habit-header">
+          <div>
+            <h2 class="habit-name">{{ item.habit.name }}</h2>
+            <div class="habit-target">
+              🎯 Target: {{ item.habit.target_days_per_week }} day{{ item.habit.target_days_per_week|pluralize }} per week
+            </div>
+          </div>
+          <div>
+            {% if item.streak > 0 %}
+              <span class="streak-badge">
+                🔥 {{ item.streak }} day{{ item.streak|pluralize }} streak
+              </span>
+            {% else %}
+              <span class="streak-badge streak-zero">
+                💤 0 day streak
+              </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Weekly Grid (Mon - Sun) -->
+        <div class="week-grid-container">
+          <table class="week-grid-table">
+            <thead>
+              <tr>
+                {% for col in week_headers %}
+                  <th class="{% if col.is_today %}is-today{% endif %}">
+                    <div>{{ col.name }}</div>
+                    <span class="day-header-number">{{ col.day_number }}</span>
+                  </th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                {% for day in item.grid %}
+                  <td>
+                    <form method="post" action="{% url 'toggle_completion' item.habit.pk %}" style="margin: 0;">
+                      {% csrf_token %}
+                      <input type="hidden" name="date" value="{{ day.iso_date }}">
+                      <button 
+                        type="submit" 
+                        class="day-cell-btn {% if day.is_completed %}completed{% endif %} {% if day.is_today %}is-today{% endif %}"
+                        title="{{ day.day_name }}, {{ day.date|date:'M j' }} - {% if day.is_completed %}Completed (Click to undo){% else %}Incomplete (Click to complete){% endif %}"
+                        aria-label="{{ day.day_name }} {{ day.day_num }}: {% if day.is_completed %}completed{% else %}incomplete{% endif %}"
+                      >
+                        {% if day.is_completed %}
+                          ✓
+                        {% else %}
+                          &bull;
+                        {% endif %}
+                      </button>
+                    </form>
+                  </td>
+                {% endfor %}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Habit Footer Actions -->
+        <div class="habit-footer">
+          <div class="progress-section">
+            <div class="progress-info">
+              <span>This Week: {{ item.week_completions }} / {{ item.habit.target_days_per_week }} days</span>
+              <span>{{ item.progress_pct }}%</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" style="width: {{ item.progress_pct }}%;"></div>
+            </div>
+          </div>
+
+          <div class="habit-actions">
+            <!-- Quick toggle for Today -->
+            <form method="post" action="{% url 'toggle_completion' item.habit.pk %}" style="display: inline;">
+              {% csrf_token %}
+              <input type="hidden" name="date" value="{{ today|date:'Y-m-d' }}">
+              {% if item.is_done_today %}
+                <button type="submit" class="btn btn-outline btn-sm" title="Undo today's completion">
+                  Undo Today
+                </button>
+              {% else %}
+                <button type="submit" class="btn btn-success btn-sm" title="Mark done for today">
+                  ✓ Mark Done Today
+                </button>
+              {% endif %}
+            </form>
+
+            <a href="{% url 'habit_update' item.habit.pk %}" class="btn btn-outline btn-sm" title="Edit habit">
+              Edit
+            </a>
+            <a href="{% url 'habit_delete' item.habit.pk %}" class="btn btn-outline btn-sm" style="color: var(--danger); border-color: #fee2e2;" title="Delete habit">
+              Delete
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+{% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🌱</div>
+    <h3>No habits yet</h3>
+    <p>Start your journey today by creating your first daily habit.</p>
+    <a href="{% url 'habit_create' %}" class="btn btn-primary">
+      Create Your First Habit
+    </a>
+  </div>
+{% endif %}
+{% endblock %}
